@@ -2,44 +2,45 @@ const { sequelize } = require('./db');
 const { Band, Musician, Song } = require('./index')
 
 describe('Band, Musician, and Song Models', () => {
-    /**
-     * Runs the code prior to all tests
-     */
+    let TestBand, TestMusician; // Declare variables to hold instances for use in multiple tests
+
     beforeAll(async () => {
-        // the 'sync' method will create tables based on the model class
-        // by setting 'force:true' the tables are recreated each time the 
-        // test suite is run
         await sequelize.sync({ force: true });
     })
 
     test('can create a Band', async () => {
-        const TestUser = await Band.create({name: "TestUser", genre: "TestGenre"})
-        expect(TestUser.name).toBe('TestUser');
-        expect(TestUser.genre).toBe('TestGenre');
+        TestBand = await Band.create({ name: "TestUser", genre: "TestGenre" })
+        expect(TestBand.name).toBe('TestUser');
+        expect(TestBand.genre).toBe('TestGenre');
     })
 
     test('can create a Musician', async () => {
-        // TODO - test creating a musician
-        expect('NO TEST').toBe('EXPECTED VALUE HERE');
+        TestMusician = await Musician.create({ name: "TestMusician", instrument: "TestInstrument" })
+        expect(TestMusician.name).toBe('TestMusician');
+        expect(TestMusician.instrument).toBe('TestInstrument');
     })
 
     test('can update a Band', async () => {
-        // TODO - test updating a band
-        expect('NO TEST').toBe('EXPECTED VALUE HERE');
+        await Band.update({ name: 'TestUser1' }, { where: { name: 'TestUser' } });
+        const updatedBand = await Band.findOne({ where: { name: 'TestUser1' } });
+        expect(updatedBand.name).toBe('TestUser1');
     })
 
     test('can update a Musician', async () => {
-        // TODO - test updating a musician
-        expect('NO TEST').toBe('EXPECTED VALUE HERE');
+        await Musician.update({ name: 'UpdatedMusician' }, { where: { name: 'TestMusician' } });
+        const updatedMusician = await Musician.findOne({ where: { name: 'UpdatedMusician' } });
+        expect(updatedMusician.name).toBe('UpdatedMusician');
     })
 
     test('can delete a Band', async () => {
-        // TODO - test deleting a band
-        expect('NO TEST').toBe('EXPECTED VALUE HERE');
+        await Band.destroy({ where: { name: 'TestUser1' } });
+        const deletedBand = await Band.findOne({ where: { name: 'TestUser1' } });
+        expect(deletedBand).toBeNull();
     })
 
     test('can delete a Musician', async () => {
-        // TODO - test deleting a musician
-        expect('NO TEST').toBe('EXPECTED VALUE HERE');
+        await Musician.destroy({ where: { name: 'UpdatedMusician' } });
+        const deletedMusician = await Musician.findOne({ where: { name: 'UpdatedMusician' } });
+        expect(deletedMusician).toBeNull();
     })
 })
