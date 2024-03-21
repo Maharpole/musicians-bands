@@ -71,3 +71,44 @@ describe('Band and Musician Association', () => {
         }
     });
 });
+
+describe('Band and Song Associations', () => {
+    let testBand, song1, song2;
+
+    beforeAll(async () => {
+        await sequelize.sync({ force: true });
+
+        testBand = await Band.create({ name: "The Example Band", genre: "Indie" });
+        song1 = await Song.create({ title: "First Song", duration: "3:00" });
+        song2 = await Song.create({ title: "Second Song", duration: "4:00" });
+
+        await testBand.addSongs([song1, song2]);
+    });
+
+    test('a band can have multiple songs', async () => {
+        const foundBand = await Band.findByPk(testBand.id, {
+            include: [{
+                model: Song,
+                as: 'Songs'
+            }]
+        });
+
+        expect(foundBand.Songs.length).toBe(2);
+        expect(foundBand.Songs.map(song => song.title)).toEqual(expect.arrayContaining(["First Song", "Second Song"]));
+    });
+
+    test('a song can belong to multiple bands', async () => {
+        const anotherBand = await Band.create({ name: "Another Band", genre: "Rock" });
+        await song1.addBand(anotherBand);
+
+        const foundSong = await Song.findByPk(song1.id, {
+            include: [{
+                model: Band,
+                as: 'Bands'
+            }]
+        });
+
+        expect(foundSong.Bands.length).toBeGreaterThan(1);
+        expect(foundSong.Bands.map(band => band.name)).toEqual(expect.arrayContaining(["The Example Band", "Another Band"]));
+    });
+});
