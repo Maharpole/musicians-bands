@@ -44,3 +44,30 @@ describe('Band, Musician, and Song Models', () => {
         expect(deletedMusician).toBeNull();
     })
 })
+
+describe('Band and Musician Association', () => {
+    beforeAll(async () => {
+        await sequelize.sync({ force: true });
+        // Create test data
+        const band = await Band.create({ name: "The Testers", genre: "Rock" });
+        await Musician.create({ name: "Guitarist", instrument: "Guitar", bandId: band.id });
+        await Musician.create({ name: "Drummer", instrument: "Drums", bandId: band.id });
+    });
+
+    test('bands should have multiple musicians', async () => {
+        const bands = await Band.findAll({
+            include: [{
+                model: Musician,
+                as: 'Musicians'
+            }]
+        });
+
+        for (let band of bands) {
+            const musicians = await band.getMusicians();
+            expect(musicians.length).toBeGreaterThan(0);
+            musicians.forEach(musician => {
+                expect(musician.bandId).toBe(band.id);
+            });
+        }
+    });
+});
